@@ -58,7 +58,14 @@ bool validanDatum(int dan,int mjesec,int godina){
 	if (dan < 1 || dan > 31) return false;
 	if (mjesec == 4 || mjesec == 6 || mjesec == 9 || mjesec == 11) return (dan <= 30);
 	if (mjesec == 1 || mjesec == 3 || mjesec == 5 || mjesec == 7 || mjesec == 8 || mjesec==10 || mjesec==12) return (dan <= 31);
-	if (mjesec==2) return (dan <= 28);
+	if (mjesec == 2 && godina % 4 == 0) {
+        if (godina % 100 == 0) {
+            if (godina % 400 == 0) return (dan <= 29);
+            else return (dan <= 28);
+        }
+        else return (dan <= 29);
+    }
+    else return (dan <= 28);
 }
 
 
@@ -78,7 +85,7 @@ void inicijalizacija(pacijent &p,ambulanta &a){
     cout<<crt<<"\t::UNOS PODATAKA O PACIJENTU::"<<crt;
     cout<<"Unesite svoje ime i prezime: ";
     cin.ignore();
-    getline(cin, p.imePrezime);*/
+    getline(cin, p.imePrezime);
     cout<<"Unesite datum rodjenja (npr. 02.09.2001.): ";
     do{
     	cin >> p.d;

@@ -80,6 +80,13 @@ struct ambulanta{
 	int lokacija, brojVakcina;
 };
 
+struct termin{
+    pacijent pacijent;
+    ambulanta ambulanta;
+    string termin;
+    string datum;
+};
+
 void inicijalizacija(pacijent &p,ambulanta &a){
     int x;
     cout<<crt<<"\t::UNOS PODATAKA O PACIJENTU::"<<crt;

@@ -3,6 +3,10 @@
 #include <iomanip>
 #include <vector>
 #include <cstring>
+#include <ctime>
+#include <stdlib.h>
+#include <chrono>
+#include <thread>
 using namespace std;
 
 char * crt = "\n---------------------------------------------\n";
@@ -70,6 +74,33 @@ bool validanDatum(int dan, int mjesec, int godina){
     else return (dan <= 28);
 }
 
+string generisiBrojLicne() {
+    int len=9;
+    string temp;
+    static const char znakovi[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPRSTUVZ";
+    
+    srand( (unsigned) time(NULL) * getpid());
+    temp.reserve(len);
+    for (int i = 0; i < len; ++i) 
+        temp += znakovi[rand() % (sizeof(znakovi) - 1)];
+    return temp;
+}
+
+string generisiBrojTelefona(){
+    int len=9;
+    string temp;
+    static const char znakovi[] = "0123456789";
+    srand( (unsigned) time(NULL) * getpid());
+    temp.reserve(len);
+    for (int i = 0; i < len; ++i) 
+        if(i==0) temp+="0";
+        else if(i==1) temp+="6";
+        else temp += znakovi[rand() % (sizeof(znakovi) - 1)];
+    return temp;
+}
+
 struct pacijent{
     string imePrezime, brojLicneKarte, brojTelefona;
     int d, m, g, prioritetnaGrupa;
@@ -121,12 +152,6 @@ struct pacijent{
         }while(x<1 || x>5);
         bolest=(bolesti)x;
         cout<<endl<<"Odaberite vasu ambulantu: "<<endl; 
-        
-        if(int(uposlenje)<=2) prioritetnaGrupa=1;
-        else if(2021-g>=75) prioritetnaGrupa=2;
-        else if(2021-g>=60 && 2021-g<75) prioritetnaGrupa=3;
-        else if (int(uposlenje)==3 || int(bolest)<5) prioritetnaGrupa=4;
-        else prioritetnaGrupa=5;
         cout<<"1. Mokusnice"<<endl;
         cout<<"2. Travnicka"<<endl;
         cout<<"3. Crkvice"<<endl;
@@ -137,19 +162,83 @@ struct pacijent{
             cin>>x;
         }while(x<1 || x>5); 
         ambulanta=(ambulante)x;
+        if(int(uposlenje)<=2) prioritetnaGrupa=1;
+        else if(2021-g>=75) prioritetnaGrupa=2;
+        else if(2021-g>=60 && 2021-g<75) prioritetnaGrupa=3;
+        else if (int(uposlenje)==3 || int(bolest)<5) prioritetnaGrupa=4;
+        else prioritetnaGrupa=5;
         ofstream prijave("prijave.txt", ios::app);
-        prijave<<endl<<prioritetnaGrupa<<" ";
+        prijave<<prioritetnaGrupa<<" ";
         prijave<<imePrezime<<" ";
         prijave<<setfill('0')<<setw(2)<<d<<"."<<setw(2)<<m<<"."<<g<<" ";
         prijave<<brojLicneKarte<<" ";
         prijave<<brojTelefona<<" ";
         prijave<<vratiUposlenje(uposlenje)<<" ";
         prijave<<vratiBolest(bolest)<<" ";
-        prijave<<vratiAmbulantu(ambulanta);
+        prijave<<vratiAmbulantu(ambulanta)<<endl;
         cout<<"REGISTRACIJA USPJESNA!"<<endl;
         prijave.close();
         system("PAUSE");
         system("cls");
+    }
+
+    void inicijalizacijaRand(){ //kreira random prijavu u prijave.txt
+        int x;
+        string temp;
+        ifstream imena("imena.txt");
+        ifstream prezimena("prezimena.txt");
+        x=rand()%101;
+        for(int i=0; i<x; i++){
+            imena>>temp;
+        }
+        imePrezime=temp;
+        x=rand()%101;
+        for(int i=0; i<x; i++){
+            prezimena>>temp;
+        }
+        imePrezime+=" "+temp;
+        imena.close();
+        prezimena.close();
+        do{
+            d=rand()%32;
+            m=rand()%13;
+            g=rand()%120+1900;
+        }while(!validanDatum(d, m, g));
+        brojLicneKarte=generisiBrojLicne();
+        brojTelefona=generisiBrojTelefona();
+        int i;
+        i=rand()%101;
+        if(i<70) x=4;
+        else if (i<80) x=3;
+        else if (i<90) x=2;
+        else if (i<100) x=1;
+        uposlenje=(uposlenja)x;
+        i=rand()%101;
+        if(i<60) x=5;
+        else if (i<70) x=4;
+        else if (i<80) x=3;
+        else if (i<90) x=2;
+        else if (i<100) x=1;
+        bolest=(bolesti)x;
+        x=rand()%5;
+        ambulanta=(ambulante)x;
+        if(int(uposlenje)<=2) prioritetnaGrupa=1;
+        else if(2021-g>=75) prioritetnaGrupa=2;
+        else if(2021-g>=60 && 2021-g<75) prioritetnaGrupa=3;
+        else if (int(uposlenje)==3 || int(bolest)<5) prioritetnaGrupa=4;
+        else prioritetnaGrupa=5;
+        ofstream prijave("prijave.txt", ios::app);
+        prijave<<prioritetnaGrupa<<" ";
+        prijave<<imePrezime<<" ";
+        prijave<<setfill('0')<<setw(2)<<d<<"."<<setw(2)<<m<<"."<<g<<" ";
+        prijave<<brojLicneKarte<<" ";
+        prijave<<brojTelefona<<" ";
+        prijave<<vratiUposlenje(uposlenje)<<" ";
+        prijave<<vratiBolest(bolest)<<" ";
+        prijave<<vratiAmbulantu(ambulanta)<<endl;
+        prijave.close();
+        chrono::seconds s(1);
+        this_thread::sleep_for(s);
     }
 
     void ispisPacijent(){ //trenutno ne radi nista ali nek ostane do finalne verzije
@@ -177,8 +266,9 @@ void ispisPrijavljenih(){ //iz prijave.txt uzima sve prijavljene te ispisuje na 
     string temp;
     ifstream ispis("prijave.txt");
     cout<<left<<setw(20)<<"Prioritetna grupa:"<<setw(20)<<"Ime i prezime:"<<setw(20)<<"Datum rodenja:"<<setw(20)<<"Broj licne karte:"<<setw(20)<<"Broj telefona:"<<setw(40)<<"Uposlenje:"<<setw(35)<<"Klinicko stanje:"<<setw(15)<<"Ambulanta:"<<endl;
-    while(!ispis.eof()){
+    while(true){
         ispis>>temp;
+        if(ispis.eof()) break;
         cout<<setw(20)<<temp;
         ispis>>temp;
         cout<<temp<<" ";
@@ -251,6 +341,30 @@ void kreirajTermine(){
     */
 }
 
+void generisiPrijave(){ //poziva inicijalizacijaRand n puta
+    system("cls");
+    int n;
+    cout<<"Unesite koliko mock prijava zelite: "<<endl;
+    cin>>n;
+    cout<<"Generisanje u toku..."<<endl;
+    for(int i=0; i<n; i++){
+        pacijent *temp=new pacijent;
+        temp->inicijalizacijaRand();
+        delete temp;
+        temp=NULL;
+    }
+    cout<<"Generisanje uspjesno!"<<endl;
+    system("PAUSE");
+}
+
+void obrisiPrijave(){ //clear-a prijave.txt
+    system("cls");
+    ofstream brisanje("prijave.txt");
+    brisanje.clear();
+    cout<<"Brisanje uspjesno!"<<endl;
+    system("PAUSE");
+}
+
 void adminMeni(){ //potpuno funkcionalan meni samo kreirajTermine trenutno ne radi nista
     int izbor=0;
     do{
@@ -259,11 +373,13 @@ void adminMeni(){ //potpuno funkcionalan meni samo kreirajTermine trenutno ne ra
         cout<<"1. Ispis liste prijavljenih"<<endl;
         cout<<"2. Sortiraj prijavljene"<<endl;
         cout<<"3. Kreiraj termine za narednu sedmicu"<<endl;
-        cout<<"4. Kraj programa"<<endl;
+        cout<<"4. [GENERISI N MOCK PRIJAVA]"<<endl;
+        cout<<"5. [OBRISI LISTU PRIJAVLJENIH]"<<endl;
+        cout<<"6. Kraj programa"<<endl;
         cout<<"Unos: ";
         do{
             cin>>izbor;
-        }while(izbor<1 || izbor>4);
+        }while(izbor<1 || izbor>6);
         switch(izbor){
             case 1:
                 ispisPrijavljenih();
@@ -275,10 +391,16 @@ void adminMeni(){ //potpuno funkcionalan meni samo kreirajTermine trenutno ne ra
                 kreirajTermine();
                 break;
             case 4:
+                generisiPrijave();
+                break;
+            case 5:
+                obrisiPrijave();
+                break;
+            case 6:
                 cout<<"Dovidenja!";
                 exit(0);
         }
-    }while(izbor!=4);
+    }while(izbor!=6);
 }
 
 void ispisiTermin(string password){ 
@@ -346,6 +468,8 @@ bool passProvjera(string password){ //pretrazuje pass u prijave.txt sto odgovara
 }
 
 int main(){
+    srand(time(NULL));
+    rand();
     pacijent temp;
     string username, password;
     string adminUser="administrator", adminPass="AZD1222"; //admin info

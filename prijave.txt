@@ -1,4 +1,0 @@
-4 Mujo Mujic 01.01.2001 987654321 061111111 Ostalo Teska_respiratorna_bolest Mokusnice
-4 Amer Pasanbegovic 02.09.2001 123456789 0644304261 Radnik_javne_sluzbe Ostalo Travnicka
-2 Haso Hasic 01.01.1930 000000000 060000000 Ostalo Ostalo Crkvice
-1 Suljo Suljic 13.02.1995 111111111 062222222 Zdravstveni_uposlenik Ostalo Kineski

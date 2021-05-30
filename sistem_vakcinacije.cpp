@@ -7,7 +7,8 @@
 #include <stdlib.h>
 #include <random>
 #include <algorithm>
-#include<functional>
+#include <functional>
+#include <sstream>
 using namespace std;
 
 char* crt = "\n---------------------------------------------\n";

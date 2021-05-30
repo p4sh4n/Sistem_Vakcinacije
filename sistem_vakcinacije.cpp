@@ -5,13 +5,16 @@
 #include <cstring>
 #include <ctime>
 #include <stdlib.h>
-#include <chrono>
-#include <thread>
+#include <random>
+#include <algorithm>
+#include<functional>
 using namespace std;
 
 char* crt = "\n---------------------------------------------\n";
 const string adminUser="administrator";
-const string adminPass="AZD1222"; 
+const string adminPass="AZD1222";
+typedef std::vector<char> char_array;
+
 /*----------ENUMERACIJE I NJIHOVE FUNKCIJE----------*/
 enum uposlenja{zdravstveni_uposlenik=1, radnik_ili_sticenik_socijalne_ustanove, javna_sluzba, ostalo};
 enum bolesti{down_sindrom=1, primatelj_transplantiranog_organa, karcinom, teska_respiratorna_bolest, Ostalo};
@@ -78,31 +81,69 @@ bool validanDatum(int dan, int mjesec, int godina){
     else return (dan <= 28);
 }
 
-string generisiBrojLicne() {
-    int len=9;
-    string temp;
-    static const char znakovi[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPRSTUVZ";
-    
-    srand( (unsigned) time(NULL) * getpid());
-    temp.reserve(len);
-    for (int i = 0; i < len; ++i) 
-        temp += znakovi[rand() % (sizeof(znakovi) - 1)];
-    return temp;
+
+char_array licnaKarta()
+{
+    return char_array( 
+    {'0','1','2','3','4',
+    '5','6','7','8','9',
+    'A','B','C','D','E','F',
+    'G','H','I','J','K',
+    'L','M','N','O','P',
+    'R','S','T','U',
+    'V','Z'
+    });
+};
+
+char_array brojTelefona()
+{
+    return char_array( 
+    {'0','1','2','3','4',
+    '5','6','7','8','9'
+    });
+};
+
+char_array trecaCifra()
+{
+    return char_array( 
+    {'0','1','2','3','4'});
+};
+
+//VRACA RANDOM STRING ZAVISNO OD DUZINE I PROSLIJEDJENOG NIZA
+std::string randomString(size_t length, std::function<char(void)> rand_char){
+    std::string str(length,0);
+    std::generate_n(str.begin(), length, rand_char);
+    return str;
 }
 
-string generisiBrojTelefona(){
-    int len=9;
+//GENERISE RANDOM BROJ LICNE KARTE
+string generisiBrojLicne() {
+    const auto brojLicneKarte = licnaKarta();
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, brojLicneKarte.size()-1);
     string temp;
-    static const char znakovi[] = "0123456789";
-    srand( (unsigned) time(NULL) * getpid());
-    temp.reserve(len);
-    for (int i = 0; i < len; ++i) 
-        if(i==0) temp+="0";
-        else if(i==1) temp+="6";
-        else temp += znakovi[rand() % (sizeof(znakovi) - 1)];
-    return temp;
+    auto randchar = [brojLicneKarte,&dist,&gen](){return brojLicneKarte[dist(gen)];};
+    auto len=9;
+    return temp+=randomString(len, randchar);
+}
+
+//GENERISE RANDOM BROJ TELEFONA
+string generisiBrojTelefona(){
+    string temp;
+    const auto broj = brojTelefona();
+    const auto trecaCif = trecaCifra();
+    auto len=1;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, broj.size()-1);
+    std::uniform_int_distribution<> distT(0, trecaCif.size()-1);
+    auto randchar = [broj,&dist,&gen](){return broj[dist(gen)];};
+    auto treca = [trecaCif,&distT,&gen](){return trecaCif[distT(gen)];};
+    temp+="06";
+    temp+=randomString(len, treca);
+    len=6;
+    return temp+randomString(len, randchar);
 }
 
 /*----------STRUKTURE----------*/
@@ -189,17 +230,25 @@ struct pacijent{
     }
 
     //KREIRANJE I ISPIS RANDOM PRIJAVE U PRIJAVE.TXT
-    void inicijalizacijaRand(){ 
+    void inicijalizacijaRand(){
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distribUsername(1, 100);
+        std::uniform_int_distribution<> distribDan(1, 31);
+        std::uniform_int_distribution<> distribMjesec(1, 12);
+        std::uniform_int_distribution<> distribGodina(1921, 2020);
+        std::uniform_int_distribution<> distribProcenat(0, 99);
+        std::uniform_int_distribution<> distribAmbulanta(1, 5);
         int x;
         string temp;
         ifstream imena("imena.txt");
         ifstream prezimena("prezimena.txt");
-        x=rand()%101;
+        x=distribUsername(gen);
         for(int i=0; i<x; i++){
             imena>>temp;
         }
         imePrezime=temp;
-        x=rand()%101;
+        x=distribUsername(gen);
         for(int i=0; i<x; i++){
             prezimena>>temp;
         }
@@ -207,27 +256,27 @@ struct pacijent{
         imena.close();
         prezimena.close();
         do{
-            d=rand()%32;
-            m=rand()%13;
-            g=rand()%120+1900;
+            d=distribDan(gen);
+            m=distribMjesec(gen);
+            g=distribGodina(gen);
         }while(!validanDatum(d, m, g));
         brojLicneKarte=generisiBrojLicne();
         brojTelefona=generisiBrojTelefona();
         int i;
-        i=rand()%101;
+        i=distribProcenat(gen);
         if(i<70) x=4;
         else if (i<80) x=3;
         else if (i<90) x=2;
         else if (i<100) x=1;
         uposlenje=(uposlenja)x;
-        i=rand()%101;
+        i=distribProcenat(gen);
         if(i<60) x=5;
         else if (i<70) x=4;
         else if (i<80) x=3;
         else if (i<90) x=2;
         else if (i<100) x=1;
         bolest=(bolesti)x;
-        x=rand()%5;
+        x=distribAmbulanta(gen);
         ambulanta=(ambulante)x;
         if(int(uposlenje)<=2) prioritetnaGrupa=1;
         else if(2021-g>=75) prioritetnaGrupa=2;
@@ -244,8 +293,6 @@ struct pacijent{
         prijave<<vratiBolest(bolest)<<" ";
         prijave<<vratiAmbulantu(ambulanta)<<endl;
         prijave.close();
-        chrono::seconds s(1);
-        this_thread::sleep_for(s);
     }
 
     //ISPIS PODATAKA JEDNOG PACIJENTA
@@ -357,7 +404,6 @@ void generisiPrijave(){
     int n;
     cout<<"Unesite koliko mock prijava zelite: "<<endl;
     cin>>n;
-    cout<<"Generisanje u toku..."<<endl;
     for(int i=0; i<n; i++){
         pacijent *temp=new pacijent;
         temp->inicijalizacijaRand();

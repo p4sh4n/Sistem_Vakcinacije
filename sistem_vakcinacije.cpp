@@ -9,7 +9,10 @@
 #include <thread>
 using namespace std;
 
-char * crt = "\n---------------------------------------------\n";
+char* crt = "\n---------------------------------------------\n";
+const string adminUser="administrator";
+const string adminPass="AZD1222"; 
+/*----------ENUMERACIJE I NJIHOVE FUNKCIJE----------*/
 enum uposlenja{zdravstveni_uposlenik=1, radnik_ili_sticenik_socijalne_ustanove, javna_sluzba, ostalo};
 enum bolesti{down_sindrom=1, primatelj_transplantiranog_organa, karcinom, teska_respiratorna_bolest, Ostalo};
 enum ambulante{mokusnice=1,travnicka,crkvice,radakovo,kineski};
@@ -57,6 +60,7 @@ string vratiAmbulantu(int x){
     }
 }
 
+/*----------FUNKCIJE POTREBNE ZA FUNKCIJE PACIJENTA----------*/
 bool validanDatum(int dan, int mjesec, int godina){
 	int minValidnaGodina(1900),maxValidnaGodina(2020);
 	if (godina<minValidnaGodina || godina>maxValidnaGodina) return false;
@@ -101,6 +105,7 @@ string generisiBrojTelefona(){
     return temp;
 }
 
+/*----------STRUKTURE----------*/
 struct pacijent{
     string imePrezime, brojLicneKarte, brojTelefona;
     int d, m, g, prioritetnaGrupa;
@@ -108,6 +113,7 @@ struct pacijent{
     bolesti bolest;
     ambulante ambulanta;
 
+    //REGISTRACIJA NOVOG PACIJENTA
     void inicijalizacija(){
         system("cls");
         int x;
@@ -182,7 +188,8 @@ struct pacijent{
         system("cls");
     }
 
-    void inicijalizacijaRand(){ //kreira random prijavu u prijave.txt
+    //KREIRANJE I ISPIS RANDOM PRIJAVE U PRIJAVE.TXT
+    void inicijalizacijaRand(){ 
         int x;
         string temp;
         ifstream imena("imena.txt");
@@ -241,7 +248,8 @@ struct pacijent{
         this_thread::sleep_for(s);
     }
 
-    void ispisPacijent(){ //trenutno ne radi nista ali nek ostane do finalne verzije
+    //ISPIS PODATAKA JEDNOG PACIJENTA
+    void ispisPacijent(){ 
         cout<<crt<<"\tPodaci o pacijentu"<<crt;
         cout<<"Ime i prezime: "<<imePrezime<<endl;
         cout<<"Datum rodjenja: "<<setfill('0')<<setw(2)<<d<<"."<<setw(2)<<m<<"."<<g<<endl;
@@ -261,7 +269,8 @@ struct termin{ //prilikom kreiranja termina koristiti funkcije unutar strukture,
     int d, m, g;
 };
 
-void ispisPrijavljenih(){ //iz prijave.txt uzima sve prijavljene te ispisuje na ekran
+/*----------GLOBALNE FUNKCIJE----------*/
+void ispisPrijavljenih(){ 
     system("cls");
     string temp;
     ifstream ispis("prijave.txt");
@@ -293,7 +302,8 @@ void ispisPrijavljenih(){ //iz prijave.txt uzima sve prijavljene te ispisuje na 
     system("PAUSE");
 }
 
-void sortirajPrijavljene(){ //sortiranje dodaje viska red, te iz tog razloga nakon sortiranja ispis nece funkcionisati uredno
+//SORTIRA PRIJAVE.TXT NA OSNOVU PRIORITETNIH GRUPA
+void sortirajPrijavljene(){
     system("cls");
     ifstream prijave("prijave.txt");
     string temp;
@@ -341,7 +351,8 @@ void kreirajTermine(){
     */
 }
 
-void generisiPrijave(){ //poziva inicijalizacijaRand n puta
+//POZIVA RANDOM PRIJAVU N PUTA
+void generisiPrijave(){ 
     system("cls");
     int n;
     cout<<"Unesite koliko mock prijava zelite: "<<endl;
@@ -357,7 +368,8 @@ void generisiPrijave(){ //poziva inicijalizacijaRand n puta
     system("PAUSE");
 }
 
-void obrisiPrijave(){ //clear-a prijave.txt
+//BRISE PODATKE IZ PRIJAVE.TXT
+void obrisiPrijave(){ 
     system("cls");
     ofstream brisanje("prijave.txt");
     brisanje.clear();
@@ -365,18 +377,19 @@ void obrisiPrijave(){ //clear-a prijave.txt
     system("PAUSE");
 }
 
-void adminMeni(){ //potpuno funkcionalan meni samo kreirajTermine trenutno ne radi nista
+//ADMIN MENI SA SVIM OPCIJAMA, OPCIJE U [] PREDSTAVLJAJU OPCIJE KOJE SE KORISTE U SVRHU TESTIRANJA
+void adminMeni(){ 
     int izbor=0;
     do{
         system("cls");
-        cout<<"\t-----ADMIN MENI-----"<<endl;
-        cout<<"1. Ispis liste prijavljenih"<<endl;
-        cout<<"2. Sortiraj prijavljene"<<endl;
-        cout<<"3. Kreiraj termine za narednu sedmicu"<<endl;
-        cout<<"4. [GENERISI N MOCK PRIJAVA]"<<endl;
-        cout<<"5. [OBRISI LISTU PRIJAVLJENIH]"<<endl;
-        cout<<"6. Kraj programa"<<endl;
-        cout<<"Unos: ";
+        cout<<"--------------------ADMIN MENI--------------------"<<endl;
+        cout<<"\n\t1. Ispis liste prijavljenih"<<endl;
+        cout<<"\t2. Sortiraj prijavljene"<<endl;
+        cout<<"\t3. Kreiraj termine za narednu sedmicu"<<endl;
+        cout<<"\t4. [GENERISI N MOCK PRIJAVA]"<<endl;
+        cout<<"\t5. [OBRISI LISTU PRIJAVLJENIH]"<<endl;
+        cout<<"\t6. Kraj programa"<<endl;
+        cout<<"\n\tUnos: ";
         do{
             cin>>izbor;
         }while(izbor<1 || izbor>6);
@@ -397,7 +410,7 @@ void adminMeni(){ //potpuno funkcionalan meni samo kreirajTermine trenutno ne ra
                 obrisiPrijave();
                 break;
             case 6:
-                cout<<"Dovidenja!";
+                cout<<"\n\tDovidenja!";
                 exit(0);
         }
     }while(izbor!=6);
@@ -410,13 +423,15 @@ void ispisiTermin(string password){
     */
 }
 
-void pacijentMeni(string username, string password){ //gotov meni ali nema funkcionalnost
+//PACIJENT MENI SA SVOJIM OPCIJAMA
+void pacijentMeni(string username, string password){ 
     system("cls");
     int izbor;
+    cout<<"--------PACIJENT MENI--------"<<endl;
     do{
-        cout<<"1. Prikazi datum i termin vakcinacije"<<endl;
-        cout<<"2. Kraj programa"<<endl;
-        cout<<"Unos: ";
+        cout<<"\n\t1. Prikazi datum i termin vakcinacije"<<endl;
+        cout<<"\t2. Kraj programa"<<endl;
+        cout<<"\n\tUnos: ";
         do{
             cin>>izbor;
         }while(izbor<1 || izbor>2);
@@ -425,13 +440,14 @@ void pacijentMeni(string username, string password){ //gotov meni ali nema funkc
                 ispisiTermin(password);
                 break;
             case 2:
-                cout<<"Dovidenja!";
+                cout<<"\n\tDovidenja!";
                 exit(0);
         }
     }while(izbor!=2);
 }
 
-bool userProvjera(string username){ //pretrazuje username-a u prijave.txt sto odgovara imenu i prezimenu
+//PRETRAZUJE UNESENI USERNAME U PRIJAVE.TXT, USERNAME ODGOVARA IMENU I PREZIMENU
+bool userProvjera(string username){ 
     string temp, ime, prezime, imeProvjera, prezimeProvjera;
     ifstream provjera("prijave.txt");
     imeProvjera=username.substr(0, username.find(' '));
@@ -451,7 +467,8 @@ bool userProvjera(string username){ //pretrazuje username-a u prijave.txt sto od
     return false;
 }
 
-bool passProvjera(string password){ //pretrazuje pass u prijave.txt sto odgovara broju licne karte
+//PRETRAZUJE UNESENI PASSWORD U PRIJAVE.TXT, PASSWORD ODGOVARA BROJU LICNE KARTE
+bool passProvjera(string password){ 
     string temp;
     ifstream provjera("prijave.txt");
     while(!provjera.eof()){
@@ -472,16 +489,17 @@ int main(){
     rand();
     pacijent temp;
     string username, password;
-    string adminUser="administrator", adminPass="AZD1222"; //admin info
-    cout<<"\tDOBRODOSLI U ASTRAZENICU!"<<endl;
     int izbor;
+    
+    cout<<"--------DOBRODOSLI U ASTRAZENICU!--------"<<endl;
+    //POCETNI MENI
     do{
         do{
-            cout<<"1. Registracija"<<endl;
-            cout<<"2. Prijava"<<endl;
-            cout<<"3. Kraj programa"<<endl;
-            cout<<"4. [ADMIN OVERRIDE]"<<endl; //obrisati prije finalne verzije
-            cout<<"Unos: ";
+            cout<<"\n\t1. Registracija"<<endl;
+            cout<<"\t2. Prijava"<<endl;
+            cout<<"\t3. [ADMIN OVERRIDE]"<<endl;
+            cout<<"\t4. Kraj programa"<<endl;
+            cout<<"\tUnos: ";
             cin>>izbor;
         }while(izbor<1 || izbor>4);
         switch(izbor){
@@ -490,13 +508,11 @@ int main(){
             case 2:
                 while(true){
                     do{
-                        cout<<"Username: ";
+                        cout<<"\tUsername: ";
                         cin.ignore();
                         getline(cin, username);
-                        cout<<username<<endl;
-                        cout<<"Password: ";
+                        cout<<"\tPassword: ";
                         getline(cin, password);
-                        cout<<password<<endl;
                         if(username==adminUser && password==adminPass) {
                             adminMeni();
                             break;
@@ -505,16 +521,15 @@ int main(){
                             pacijentMeni(username, password);
                             break;
                         }
-                        else cout<<"Pogresni username i/ili password!"<<endl;
+                        else cout<<"\tPogresni username i/ili password!"<<endl;
                     }while(true);
                 }
             case 3:
-                cout<<"Dovidenja!"<<endl;
-                exit(0);
-            case 4:
                 adminMeni();
                 break;
+            case 4:
+                cout<<"\n\tDovidenja!"<<endl;
+                exit(0);
         }
     }while(izbor!=3);
-    return 0;
 }

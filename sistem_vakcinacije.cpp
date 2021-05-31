@@ -372,6 +372,36 @@ void sortirajPrijavljene(){
     system("PAUSE");
 }
 
+//PREBACUJE SVE PRIJAVE U VAKCINISANI.TXT
+void sviVakcinisani(){
+    remove("vakcinisani.txt");
+    rename("prijave.txt", "vakcinisani.txt");
+    ofstream temp("prijave.txt");
+    temp.close();
+}
+
+//PREBACUJE VAKCINISANE IZ PRIJAVE.TXT U VAKCINISANI.TXT DOK OSTAVLJA NEVAKCINISANE
+void prebaciVakcinisane(int brojVakcina){
+    string temp;
+    ofstream vakcinisani("vakcinisani.txt");
+    ofstream novePrijave("temp.txt");
+    ifstream ostatakPrijava("prijave.txt");
+    for(int i=0; i<brojVakcina; i++){
+        getline(ostatakPrijava, temp);
+        vakcinisani<<temp<<endl;
+        }
+    while(true){
+        getline(ostatakPrijava, temp);
+        if(ostatakPrijava.eof()) break;
+        novePrijave<<temp<<endl;
+    }
+    ostatakPrijava.close();
+    vakcinisani.close();
+    novePrijave.close();
+    remove("prijave.txt");
+    rename("temp.txt", "prijave.txt");
+}
+
 //UZIMA PODATKE IZ PRIJAVE.TXT, TE NA OSNOVU BROJA VAKCINA UNESENOG OD ADMINISTRATORA KREIRA TERMINI.TXT
 void kreirajTermine(){
     system("cls");
@@ -409,6 +439,10 @@ void kreirajTermine(){
         if(prijave.eof()) {
             cout<<"\tPrijave uspjesno kreirane!"<<endl;
             cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            prijave.close();
+            termini.close();
+            sviVakcinisani();
+            system("PAUSE");
             return;
         }
         termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
@@ -435,6 +469,10 @@ void kreirajTermine(){
         if(prijave.eof()) {
             cout<<"\tPrijave uspjesno kreirane!"<<endl;
             cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            prijave.close();
+            termini.close();
+            sviVakcinisani();
+            system("PAUSE");
             return;
         }
         termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
@@ -461,6 +499,10 @@ void kreirajTermine(){
         if(prijave.eof()) {
             cout<<"\tPrijave uspjesno kreirane!"<<endl;
             cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            prijave.close();
+            termini.close();
+            sviVakcinisani();
+            system("PAUSE");
             return;
         }
         termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
@@ -487,6 +529,10 @@ void kreirajTermine(){
         if(prijave.eof()) {
             cout<<"\tPrijave uspjesno kreirane!"<<endl;
             cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            prijave.close();
+            termini.close();
+            sviVakcinisani();
+            system("PAUSE");
             return;
         }
         termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
@@ -513,6 +559,10 @@ void kreirajTermine(){
         if(prijave.eof()) {
             cout<<"\tPrijave uspjesno kreirane!"<<endl;
             cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            prijave.close();
+            termini.close();
+            sviVakcinisani();
+            system("PAUSE");
             return;
         }
         termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
@@ -533,23 +583,7 @@ void kreirajTermine(){
     }
     prijave.close();
     termini.close();
-    ofstream vakcinisani("vakcinisani.txt");
-    ofstream novePrijave("temp.txt");
-    ifstream ostatakPrijava("prijave.txt");
-    for(int i=0; i<brojVakcina; i++){
-        getline(ostatakPrijava, temp);
-        vakcinisani<<temp<<endl;
-        }
-    while(true){
-        getline(ostatakPrijava, temp);
-        if(ostatakPrijava.eof()) break;
-        novePrijave<<temp<<endl;
-    }
-    ostatakPrijava.close();
-    vakcinisani.close();
-    novePrijave.close();
-    remove("prijave.txt");
-    rename("temp.txt", "prijave.txt");
+    prebaciVakcinisane(brojVakcina);
     cout<<"\tTermini uspjesno kreirani!"<<endl;
     system("PAUSE");
 }

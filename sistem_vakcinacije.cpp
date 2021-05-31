@@ -402,8 +402,8 @@ void kreirajTermine(){
     }while(!validanDatum(d, m, g));
 
     string temp;
-    termini<<d<<"."<<m<<"."<<g<<endl;
-    termini<<left<<setw(15)<<"PONEDELJAK: ";
+    termini<<setw(2)<<setfill('0')<<d<<"."<<setw(2)<<setfill('0')<<m<<"."<<g<<endl;
+    termini<<left<<setw(15)<<setfill(' ')<<"PONEDELJAK: ";
     for(int i=0; i<dnevniBrojVakcina; i++){
         prijave>>temp;
         if(prijave.eof()) {
@@ -533,26 +533,20 @@ void kreirajTermine(){
     }
     prijave.close();
     termini.close();
+    ofstream vakcinisani("vakcinisani.txt");
     ofstream novePrijave("temp.txt");
-    ifstream brisanje("prijave.txt");
+    ifstream ostatakPrijava("prijave.txt");
     for(int i=0; i<brojVakcina; i++){
-        getline(brisanje, temp);
-        if(brisanje.eof()) {
-            brisanje.clear();
-            cout<<"\tTermini uspjesno kreirani!"<<endl;
-            system("PAUSE");
-            brisanje.close();
-            novePrijave.close();
-            remove("temp.txt");
-            return;
+        getline(ostatakPrijava, temp);
+        vakcinisani<<temp<<endl;
         }
-    }
     while(true){
-        getline(brisanje, temp);
-        if(brisanje.eof()) break;
+        getline(ostatakPrijava, temp);
+        if(ostatakPrijava.eof()) break;
         novePrijave<<temp<<endl;
     }
-    brisanje.close();
+    ostatakPrijava.close();
+    vakcinisani.close();
     novePrijave.close();
     remove("prijave.txt");
     rename("temp.txt", "prijave.txt");
@@ -625,17 +619,20 @@ void adminMeni(){
     }while(izbor!=6);
 }
 
-void ispisiTermin(string password){ 
-    /*
-    -Na osnovu broja licne karte/passworda ispisati datum i vrijeme vakcinacije iz dokumenta termini.txt
-    -U slucaju da jos nema termin ispisati navedeno
-    */
+//Na osnovu broja licne karte/passworda ispisuje datum i vrijeme vakcinacije iz dokumenta termini.txt
+void ispisiTermin(string password){
     system("cls");
     string temp1, temp2, temp3;
     string temp, vrijeme;
     int br=0;
     ifstream termin("termini.txt");
     termin>>temp;
+    if(termin.eof()){
+            cout<<"\tTermin Vam jos nije dodijeljen!"<<endl;
+            system("PAUSE");
+            termin.close();
+            return;
+    }
     temp1=temp.substr(0, 2);
     temp2=temp.substr(3, 2);
     temp3=temp.substr(6, 4);
@@ -645,18 +642,17 @@ void ispisiTermin(string password){
     mjesec>>m;
     godina>>g;
     while(true){
+        termin>>temp;
         if(termin.eof()){
             cout<<"\tTermin Vam jos nije dodijeljen!"<<endl;
             system("PAUSE");
             termin.close();
             return;
         }
-        termin>>temp;
-        if(temp=="Ponedeljak:" || temp=="Utorak:" || temp=="Srijeda:" || temp=="Cetvrtak:" || temp=="Petak:" ) {
+        if(temp=="PONEDELJAK:" || temp=="UTORAK:" || temp=="SRIJEDA:" || temp=="CETVRTAK:" || temp=="PETAK:" ) {
             termin>>temp;
             br++;
         }
-        termin>>temp;
         termin>>vrijeme;
         termin>>temp;
         if(temp==password){
@@ -664,17 +660,18 @@ void ispisiTermin(string password){
                 d++;
                 if(!validanDatum(d, m, g)){
                     m++;
-                    d=0;
+                    d=1;
                     if(!validanDatum(d, m, g)){
                         g++;
                         m=1;
                     }
                 }
             }
-            cout<<"Datum vakcinacije: "<<setw(2)<<setfill('0')<<d<<setw(2)<<m<<g<<endl;
+            cout<<"Datum vakcinacije: "<<setw(2)<<setfill('0')<<d<<"."<<setw(2)<<m<<"."<<g<<"."<<endl;
             cout<<"Vrijeme vakcinacije: "<<vrijeme<<endl;
-            system("PAUSE");
             termin.close();
+            system("PAUSE");
+            return;
         }
     }
 }
@@ -706,10 +703,9 @@ void pacijentMeni(string username, string password){
 bool userProvjera(string username){ 
     string temp, ime, prezime, imeProvjera, prezimeProvjera;
     ifstream provjera("prijave.txt");
+    ifstream provjeraVakcinisani("vakcinisani.txt");
     imeProvjera=username.substr(0, username.find(' '));
-    cout<<imeProvjera<<endl;
     prezimeProvjera=username.substr(username.find(' ')+1, username.length()-imeProvjera.length());
-    cout<<prezimeProvjera<<endl;
     while(!provjera.eof()){
         provjera>>temp;
         provjera>>temp;
@@ -719,6 +715,16 @@ bool userProvjera(string username){
         if(ime==imeProvjera && prezime==prezimeProvjera) return true;
         getline(provjera, temp);
     }
+    while(!provjeraVakcinisani.eof()){
+        provjeraVakcinisani>>temp;
+        provjeraVakcinisani>>temp;
+        ime=temp;
+        provjeraVakcinisani>>temp;
+        prezime=temp;
+        if(ime==imeProvjera && prezime==prezimeProvjera) return true;
+        getline(provjeraVakcinisani, temp);
+    }
+    provjeraVakcinisani.close();
     provjera.close();
     return false;
 }
@@ -727,6 +733,7 @@ bool userProvjera(string username){
 bool passProvjera(string password){ 
     string temp;
     ifstream provjera("prijave.txt");
+    ifstream provjeraVakcinisani("vakcinisani.txt");
     while(!provjera.eof()){
         provjera>>temp;
         provjera>>temp;
@@ -736,6 +743,16 @@ bool passProvjera(string password){
         if(temp==password) return true;
         getline(provjera, temp);
     }
+    while(!provjeraVakcinisani.eof()){
+        provjeraVakcinisani>>temp;
+        provjeraVakcinisani>>temp;
+        provjeraVakcinisani>>temp;
+        provjeraVakcinisani>>temp;
+        provjeraVakcinisani>>temp;
+        if(temp==password) return true;
+        getline(provjeraVakcinisani, temp);
+    }
+    provjeraVakcinisani.close();
     provjera.close();
     return false;
 }

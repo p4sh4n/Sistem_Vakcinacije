@@ -224,7 +224,7 @@ struct pacijent{
         prijave<<vratiUposlenje(uposlenje)<<" ";
         prijave<<vratiBolest(bolest)<<" ";
         prijave<<vratiAmbulantu(ambulanta)<<endl;
-        cout<<"REGISTRACIJA USPJESNA!"<<endl;
+        cout<<"\nREGISTRACIJA USPJESNA!"<<endl;
         prijave.close();
         system("PAUSE");
         system("cls");
@@ -591,6 +591,7 @@ void adminMeni(){
     do{
         system("cls");
         cout<<"--------------------ADMIN MENI--------------------"<<endl;
+        cout<<"\n\tUPUTE: Sortiranje prijavljenih pozivati prije kreiranja termina\n\t       Sortirati i kreirati termine nedjeljom"<<endl;
         cout<<"\n\t1. Ispis liste prijavljenih"<<endl;
         cout<<"\t2. Sortiraj prijavljene"<<endl;
         cout<<"\t3. Kreiraj termine za narednu sedmicu"<<endl;
@@ -629,13 +630,60 @@ void ispisiTermin(string password){
     -Na osnovu broja licne karte/passworda ispisati datum i vrijeme vakcinacije iz dokumenta termini.txt
     -U slucaju da jos nema termin ispisati navedeno
     */
+    system("cls");
+    string temp1, temp2, temp3;
+    string temp, vrijeme;
+    int br=0;
+    ifstream termin("termini.txt");
+    termin>>temp;
+    temp1=temp.substr(0, 2);
+    temp2=temp.substr(3, 2);
+    temp3=temp.substr(6, 4);
+    stringstream dan(temp1), mjesec(temp2), godina(temp3);
+    int d, m, g;
+    dan>>d;
+    mjesec>>m;
+    godina>>g;
+    while(true){
+        if(termin.eof()){
+            cout<<"\tTermin Vam jos nije dodijeljen!"<<endl;
+            system("PAUSE");
+            termin.close();
+            return;
+        }
+        termin>>temp;
+        if(temp=="Ponedeljak:" || temp=="Utorak:" || temp=="Srijeda:" || temp=="Cetvrtak:" || temp=="Petak:" ) {
+            termin>>temp;
+            br++;
+        }
+        termin>>temp;
+        termin>>vrijeme;
+        termin>>temp;
+        if(temp==password){
+            for(int i=0; i<br; i++){
+                d++;
+                if(!validanDatum(d, m, g)){
+                    m++;
+                    d=0;
+                    if(!validanDatum(d, m, g)){
+                        g++;
+                        m=1;
+                    }
+                }
+            }
+            cout<<"Datum vakcinacije: "<<setw(2)<<setfill('0')<<d<<setw(2)<<m<<g<<endl;
+            cout<<"Vrijeme vakcinacije: "<<vrijeme<<endl;
+            system("PAUSE");
+            termin.close();
+        }
+    }
 }
 
 //PACIJENT MENI SA SVOJIM OPCIJAMA
 void pacijentMeni(string username, string password){ 
     system("cls");
     int izbor;
-    cout<<"--------PACIJENT MENI--------"<<endl;
+    cout<<"\t--------PACIJENT MENI--------"<<endl;
     do{
         cout<<"\n\t1. Prikazi datum i termin vakcinacije"<<endl;
         cout<<"\t2. Kraj programa"<<endl;

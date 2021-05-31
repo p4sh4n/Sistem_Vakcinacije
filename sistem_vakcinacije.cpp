@@ -64,9 +64,9 @@ string vratiAmbulantu(int x){
     }
 }
 
-/*----------FUNKCIJE POTREBNE ZA FUNKCIJE PACIJENTA----------*/
+/*----------FUNKCIJE POTREBNE ZA FUNKCIJE STRUKTURE PACIJENT----------*/
 bool validanDatum(int dan, int mjesec, int godina){
-	int minValidnaGodina(1900),maxValidnaGodina(2020);
+	int minValidnaGodina(1900),maxValidnaGodina(2021);
 	if (godina<minValidnaGodina || godina>maxValidnaGodina) return false;
 	if (mjesec<1 || mjesec>12) return false;
 	if (dan < 1 || dan > 31) return false;
@@ -308,13 +308,6 @@ struct pacijent{
         cout<<"Ambulanta prijave: "<<vratiAmbulantu(ambulanta)<<endl;
         cout<<"Prioritetna grupa: "<<prioritetnaGrupa<<endl;
     }
-
-};
-
-struct termin{ //prilikom kreiranja termina koristiti funkcije unutar strukture, a ne globalne
-    pacijent pacijent;
-    string termin;
-    int d, m, g;
 };
 
 /*----------GLOBALNE FUNKCIJE----------*/
@@ -379,24 +372,192 @@ void sortirajPrijavljene(){
     system("PAUSE");
 }
 
+//UZIMA PODATKE IZ PRIJAVE.TXT, TE NA OSNOVU BROJA VAKCINA UNESENOG OD ADMINISTRATORA KREIRA TERMINI.TXT
 void kreirajTermine(){
-    /*
-    -Omoguciti administratoru unos broja vakcina za sedmicu
-    -Na osnovu broja vakcina kreirati za svaki dan brojVakcina/5 termina od npr. 10:00 sa razmakom od 5 minuta izmedju termina
-    -U novi dokument termini.txt ispisati po kolonama termine u formatu:
-    PONEDELJAK              UTORAK                  SRIJEDA                 CETVRTAK                PETAK
-    vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte
-    vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte
-    vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte  vrijeme brojLicneKarte
-    .
-    .
-    .
+    system("cls");
+    int brojVakcina, brojRadnika, d, m, g, h=8, min=0, br=0;
+    ofstream termini("termini.txt");
+    ifstream prijave("prijave.txt");
+    while(true){
+        cout<<"\tUnesite broj vakcina za ovu sedmicu: ";
+        cin>>brojVakcina;
+        cout<<"\tUnesite broj zdravstvenih radnika za ovu sedmicu: ";
+        cin>>brojRadnika;
+        if(brojVakcina>360*brojRadnika) {
+            cout<<"\t[ERROR] Prevelik broj vakcina na zadani broj radnika"<<endl;
+            cout<<"\tSmanjite broj vakcina ili povecajte broj radnika!"<<endl;
+        }
+        else break;
+    }
+    int dnevniBrojVakcina=brojVakcina/5;
+    int ostatakVakcina=brojVakcina%5;
+    cout<<"\tUnesite danasnji datum: ";
+    do{
+        cin>>d;
+        cin.get();
+        cin>>m;
+        cin.get();
+        cin>>g;
+        cin.get();
+    }while(!validanDatum(d, m, g));
 
-    -Tricky part nakon ovoga: obrisati sve prijavljene iz prijave.txt koji su dobili svoj termin a ostaviti za sljedecu sedmicu one bez termina
-    (ideja: dodati varijablu u strukturu pacijent koja se odnosi na postojanje termina za pacijenta na osnovu koje se taj pacijent brise ili ostavlja u prijave.txt)
-    (dodatni tip: kada dodje do prvog pacijenta kojem je vrijednost false svi ostaju u dokumentu iz razloga sto su pacijenti vec sortirani po prioritetnim grupama, te kada prvi nema termin svi do kraja nemaju)
-    
-    */
+    string temp;
+    termini<<d<<"."<<m<<"."<<g<<endl;
+    termini<<left<<setw(15)<<"PONEDELJAK: ";
+    for(int i=0; i<dnevniBrojVakcina; i++){
+        prijave>>temp;
+        if(prijave.eof()) {
+            cout<<"\tPrijave uspjesno kreirane!"<<endl;
+            cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            return;
+        }
+        termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
+        if((i+1)%brojRadnika==0){
+            min+=10;
+            if(min==60) {
+                h++;
+                min=0;
+            }
+        }
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        termini<<temp;
+        br++;
+        getline(prijave, temp);
+    }
+    h=8;
+    min=0;
+    termini<<endl<<left<<setw(15)<<setfill(' ')<<"UTORAK: ";
+    for(int i=0; i<dnevniBrojVakcina; i++){
+        prijave>>temp;
+        if(prijave.eof()) {
+            cout<<"\tPrijave uspjesno kreirane!"<<endl;
+            cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            return;
+        }
+        termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
+        if((i+1)%brojRadnika==0){
+            min+=10;
+            if(min==60) {
+                h++;
+                min=0;
+            }
+        }
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        termini<<temp;
+        br++;
+        getline(prijave, temp);
+    }
+    h=8;
+    min=0;
+    termini<<endl<<left<<setw(15)<<setfill(' ')<<"SRIJEDA: ";
+    for(int i=0; i<dnevniBrojVakcina; i++){
+        prijave>>temp;
+        if(prijave.eof()) {
+            cout<<"\tPrijave uspjesno kreirane!"<<endl;
+            cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            return;
+        }
+        termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
+        if((i+1)%brojRadnika==0){
+            min+=10;
+            if(min==60) {
+                h++;
+                min=0;
+            }
+        }
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        termini<<temp;
+        br++;
+        getline(prijave, temp);
+    }
+    h=8;
+    min=0;
+    termini<<endl<<left<<setw(15)<<setfill(' ')<<"CETVRTAK: ";
+    for(int i=0; i<dnevniBrojVakcina; i++){
+        prijave>>temp;
+        if(prijave.eof()) {
+            cout<<"\tPrijave uspjesno kreirane!"<<endl;
+            cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            return;
+        }
+        termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
+        if((i+1)%brojRadnika==0){
+            min+=10;
+            if(min==60) {
+                h++;
+                min=0;
+            }
+        }
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        termini<<temp;
+        br++;
+        getline(prijave, temp);
+    }
+    h=8;
+    min=0;
+    termini<<endl<<left<<setw(15)<<setfill(' ')<<"PETAK: ";
+    for(int i=0; i<dnevniBrojVakcina+ostatakVakcina; i++){
+        prijave>>temp;
+        if(prijave.eof()) {
+            cout<<"\tPrijave uspjesno kreirane!"<<endl;
+            cout<<"\tOstatak vakcina: "<<brojVakcina-br<<endl;
+            return;
+        }
+        termini<<" | "<<h<<":"<<setw(2)<<setfill('0')<<min<<" ";
+        if((i+1)%brojRadnika==0){
+            min+=10;
+            if(min==60) {
+                h++;
+                min=0;
+            }
+        }
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        prijave>>temp;
+        termini<<temp;
+        br++;
+        getline(prijave, temp);
+    }
+    prijave.close();
+    termini.close();
+    ofstream novePrijave("temp.txt");
+    ifstream brisanje("prijave.txt");
+    for(int i=0; i<brojVakcina; i++){
+        getline(brisanje, temp);
+        if(brisanje.eof()) {
+            brisanje.clear();
+            cout<<"\tTermini uspjesno kreirani!"<<endl;
+            system("PAUSE");
+            brisanje.close();
+            novePrijave.close();
+            remove("temp.txt");
+            return;
+        }
+    }
+    while(true){
+        getline(brisanje, temp);
+        if(brisanje.eof()) break;
+        novePrijave<<temp<<endl;
+    }
+    brisanje.close();
+    novePrijave.close();
+    remove("prijave.txt");
+    rename("temp.txt", "prijave.txt");
+    cout<<"\tTermini uspjesno kreirani!"<<endl;
+    system("PAUSE");
 }
 
 //POZIVA RANDOM PRIJAVU N PUTA

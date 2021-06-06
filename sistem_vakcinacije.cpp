@@ -43,7 +43,7 @@ string vratiBolest(int x){
         case 1:
             return "Down_sindrom";
         case 2:
-            return "Primatelj_transplantiranog_organa";
+            return "TRO";
         case 3:
             return "Karcinom";
         case 4:
@@ -161,6 +161,8 @@ struct pacijent{
 
     //REGISTRACIJA NOVOG PACIJENTA
     void inicijalizacija(){
+        bool ignore=true;
+        bool error=false;
     	int validnaLicna(0);
         system("cls");
         int x;
@@ -175,6 +177,7 @@ struct pacijent{
         cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
         cout<<setw(25)<<" "<<setw(1)<<"Unesite datum rodjenja (npr. 02.09.2001.): \n"<<endl;
         do{
+            if(error) cout<<setw(25)<<" "<<setw(1)<<"[ERROR]Unijeli ste nepostojeci datum!"<<endl;
         	cout<<setw(35)<<" ";
             cin >> d;
             cin.get();
@@ -182,17 +185,19 @@ struct pacijent{
             cin.get();
             cin >> g;
             cin.get();
+            error=true;
         }while(!validanDatum(d, m, g));
         cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
         cout<<setw(10)<<" "<<setw(1)<<"Unesite broj licne karte (u prijavi ce ovo biti vas password): \n"<<endl;
         do{
         	if (validnaLicna>0) cout<<setw(25)<<" "<<setw(1)<< "Unesite validan broj licne karte:\n"<<endl;
         	cout<<setw(35)<<" ";
-        	cin.ignore();
+        	if(ignore) cin.ignore();
             getline(cin, brojLicneKarte);
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
             validnaLicna++;
-        }while((brojLicneKarte.length()!=9));
+            ignore=false;
+        }while(brojLicneKarte.length()!=9);
         cout<<setw(10)<<" "<<setw(1)<<"Unesite broj telefona: ";
         getline(cin, brojTelefona);
         cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
@@ -332,15 +337,20 @@ struct pacijent{
     }
 };
 
+struct doktor{
+    string ime, prezime;
+    int ID;
+};
+
 /*----------GLOBALNE FUNKCIJE----------*/
 void ispisPrijavljenih(){ 
     system("cls");
     string temp;
     ifstream ispis("prijave.txt");
-    cout << bl;
+    cout << bl <<endl;
     cout<<left<<setw(2)<<" "<<setw(18)<<"Prioritetna grupa"<<setw(1)<<"|*|"<<setw(4)<<" "<<setw(16)<<"Ime i prezime"<<setw(1)<<"|*|"<<setw(4)<<" "<<setw(16)<<"Datum rodenja"<<setw(1)<<"|*|"<<setw(2)<<" "<<setw(18)<<"Broj licne karte"
 	<<setw(1)<<"|*|"<<setw(4)<<" "<<setw(16)<<"Broj telefona"<<setw(1)<<"|*|"<<setw(15)<<" "<<setw(25)<<"Uposlenje"<<setw(1)<<"|*|"<<setw(8)<<" "<<setw(22)<<"Klinicko stanje"<<setw(1)<<"|*|"<<setw(13)<<" Ambulanta"<<endl;
-	cout << bl;
+	cout << bl <<endl;
     while(true){
         ispis>>temp;
         if(ispis.eof()) break;
@@ -394,7 +404,8 @@ void sortirajPrijavljene(){
         ispis<<prijavljeni[i]<<endl;
     }
     ispis.close();
-    cout<<"Sortiranje uspjesno!"<<endl;
+    cout<<setw(10)<<" "<<setw(1)<<"Sortiranje uspjesno!"<<endl;
+    cout<<endl<<setw(10)<<" "<<setw(1)<<bl3<<endl;
     system("PAUSE");
 }
 
@@ -428,6 +439,11 @@ void prebaciVakcinisane(int brojVakcina){
     rename("temp.txt", "prijave.txt");
 }
 
+int ispisiOstatakVakcina(int brojVakcina, int brojPrijava){
+    if(brojVakcina==brojPrijava) return 0;
+    else return 1+ispisiOstatakVakcina(brojVakcina-1, brojPrijava);
+}
+
 //UZIMA PODATKE IZ PRIJAVE.TXT, TE NA OSNOVU BROJA VAKCINA UNESENOG OD ADMINISTRATORA KREIRA TERMINI.TXT
 void kreirajTermine(){
     system("cls");
@@ -445,12 +461,11 @@ void kreirajTermine(){
         	cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"[ERROR] Prevelik broj vakcina na zadani broj radnika\n"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"Smanjite broj vakcina ili povecajte broj radnika!"<<endl;
-            cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
-            cout<<setw(10)<<" "<<setw(1)<<bl3<<endl;
-       
+            cout<<setw(10)<<" "<<setw(1)<<"Preporucen broj radnika na uneseni broj vakcina: "<<brojVakcina/360+1<<endl;
         }
         else break;
     }
+    doktor doktori[brojRadnika];
     int dnevniBrojVakcina=brojVakcina/5;
     int ostatakVakcina=brojVakcina%5;
     cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
@@ -475,6 +490,14 @@ void kreirajTermine(){
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"Ostatak vakcina: "<<brojVakcina-br<<endl;
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
+            for(int i=0; i<brojRadnika; i++){
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ime i prezime "<<i+1<<". radnika: ";
+                cin>>doktori[i].ime;
+                cin>>doktori[i].prezime;
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ID "<<i+1<<". radnika: ";
+                cin>>doktori[i].ID;
+                termini<<endl<<"| "<<doktori[i].ime<<" "<<doktori[i].prezime<<" |";
+            }
             prijave.close();
             termini.close();
             sviVakcinisani();
@@ -506,8 +529,16 @@ void kreirajTermine(){
         	cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"Prijave uspjesno kreirane!"<<endl;
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
-            cout<<setw(10)<<" "<<setw(1)<<"Ostatak vakcina: "<<brojVakcina-br<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<"Ostatak vakcina: "<<ispisiOstatakVakcina(brojVakcina, br)<<endl;
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
+            for(int i=0; i<brojRadnika; i++){
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ime i prezime "<<i+1<<". radnika: ";
+                cin>>doktori[i].ime;
+                cin>>doktori[i].prezime;
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ID "<<i+1<<". radnika: ";
+                cin>>doktori[i].ID;
+                termini<<endl<<"| "<<doktori[i].ime<<" "<<doktori[i].prezime<<" |";
+            }
             prijave.close();
             termini.close();
             sviVakcinisani();
@@ -541,6 +572,14 @@ void kreirajTermine(){
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"Ostatak vakcina: "<<brojVakcina-br<<endl;
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
+            for(int i=0; i<brojRadnika; i++){
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ime i prezime "<<i+1<<". radnika: ";
+                cin>>doktori[i].ime;
+                cin>>doktori[i].prezime;
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ID "<<i+1<<". radnika: ";
+                cin>>doktori[i].ID;
+                termini<<endl<<"| "<<doktori[i].ime<<" "<<doktori[i].prezime<<" |";
+            }
             prijave.close();
             termini.close();
             sviVakcinisani();
@@ -574,6 +613,14 @@ void kreirajTermine(){
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"Ostatak vakcina: "<<brojVakcina-br<<endl;
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
+            for(int i=0; i<brojRadnika; i++){
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ime i prezime "<<i+1<<". radnika: ";
+                cin>>doktori[i].ime;
+                cin>>doktori[i].prezime;
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ID "<<i+1<<". radnika: ";
+                cin>>doktori[i].ID;
+                termini<<endl<<"| "<<doktori[i].ime<<" "<<doktori[i].prezime<<" |";
+            }
             prijave.close();
             termini.close();
             sviVakcinisani();
@@ -607,6 +654,14 @@ void kreirajTermine(){
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"Ostatak vakcina: "<<brojVakcina-br<<endl;
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
+            for(int i=0; i<brojRadnika; i++){
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ime i prezime "<<i+1<<". radnika: ";
+                cin>>doktori[i].ime;
+                cin>>doktori[i].prezime;
+                cout<<setw(10)<<" "<<setw(1)<<"Unesite ID "<<i+1<<". radnika: ";
+                cin>>doktori[i].ID;
+                termini<<endl<<"| "<<doktori[i].ime<<" "<<doktori[i].prezime<<" |";
+            }
             prijave.close();
             termini.close();
             sviVakcinisani();
@@ -629,6 +684,16 @@ void kreirajTermine(){
         br++;
         getline(prijave, temp);
     }
+    termini<<endl;
+    for(int i=0; i<brojRadnika; i++){
+        cout<<setw(10)<<" "<<setw(1)<<"Unesite ime i prezime "<<i+1<<". radnika: ";
+        cin>>doktori[i].ime;
+        cin>>doktori[i].prezime;
+        cout<<setw(10)<<" "<<setw(1)<<"Unesite ID "<<i+1<<". radnika: ";
+        cin>>doktori[i].ID;
+        termini<<endl<<"| "<<doktori[i].ime<<" "<<doktori[i].prezime<<" |";
+    }
+
     prijave.close();
     termini.close();
     prebaciVakcinisane(brojVakcina);
@@ -783,7 +848,7 @@ void ispisiTermin(string password){
             }
             cout<<setw(10)<<" "<<setw(1)<<bl3;
             cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
-            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(24)<<"Datum vakcinacije: "<<setw(2)<<setfill(' ')<<d<<"."<<setw(2)<<m<<"."<<g<<"."<<setw(5)<<"|*|"<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(24)<<"Datum vakcinacije: "<<setw(2)<<setfill('0')<<d<<"."<<setw(2)<<m<<"."<<g<<"."<<setfill(' ')<<setw(5)<<"|*|"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<bl3;
             cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
@@ -891,13 +956,12 @@ bool passProvjera(string password){
 }
 
 int main(){
+    bool ignore=true;
 	HWND console = GetConsoleWindow();
 	RECT r;
 	GetWindowRect(console, &r);
 	MoveWindow(console, r.left, r.top, 1680, 1050, TRUE);
-    srand(time(NULL));
-    rand();
-    pacijent temp;
+    pacijent *temp = new pacijent;
     string username, password;
     int izbor;
     for (int i=0;i<5;i++) cout<<endl;
@@ -922,31 +986,29 @@ int main(){
         }while(izbor<1 || izbor>4);
         switch(izbor){
             case 1:
-                temp.inicijalizacija();
+                temp->inicijalizacija();
             case 2:
-                    do{	
-                    	cout<<endl<<setw(10)<<" "<<setw(1)<<bl3;
-                        cout<<endl<<setw(25)<<"    Username: ";
-                        
-                        cin.ignore();
-                        getline(cin, username);
+                do{	
+                    cout<<endl<<setw(10)<<" "<<setw(1)<<bl3;
+                    cout<<endl<<setw(25)<<"    Username: ";
+                    if(ignore) cin.ignore();
+                    getline(cin, username);
+                    cout<<endl<<setw(10)<<" "<<setw(1)<<bl3;
+                    cout<<endl<<setw(25)<<"    Password: ";
+                    getline(cin, password);
+                    if(username==adminUser && password==adminPass) {
+                        adminMeni();
+                        break;
+                    }
+                    if (userProvjera(username) && passProvjera(password)) {
+                        pacijentMeni(username, password);
+                        break;
+                    }else {
                         cout<<endl<<setw(10)<<" "<<setw(1)<<bl3;
-                        cout<<endl<<setw(25)<<"    Password: ";
-                        getline(cin, password);
-                        if(username==adminUser && password==adminPass) {
-                            adminMeni();
-                            break;
-                        }
-                        if (userProvjera(username) && passProvjera(password)) {
-                            pacijentMeni(username, password);
-                            break;
-                        }else {
-                        cout<<endl<<setw(10)<<" "<<setw(1)<<bl3;
-						cout<<endl<<setw(15)<<" "<<setw(1)<<"Pogresni username i/ili password!"<<endl;
-						
-						
-					}
-                    }while(true);
+                        cout<<endl<<setw(15)<<" "<<setw(1)<<"Pogresni username i/ili password!"<<endl;
+                    }
+                    ignore=false;
+                }while(true);
             case 3:
                 adminMeni();
                 break;
@@ -960,6 +1022,7 @@ int main(){
                 exit(0);
         }
     }while(izbor!=3);
+    delete temp;
 }
 
 

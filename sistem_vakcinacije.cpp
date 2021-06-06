@@ -21,7 +21,7 @@ const string adminPass="AZD1222";
 typedef std::vector<char> char_array;
 
 /*----------ENUMERACIJE I NJIHOVE FUNKCIJE----------*/
-enum uposlenja{zdravstveni_uposlenik=1, radnik_ili_sticenik_socijalne_ustanove, javna_sluzba, ostalo};
+enum uposlenja{zdravstveni_uposlenik=1, radnik_socijalne_ustanove, javna_sluzba, ostalo};
 enum bolesti{down_sindrom=1, PTO, karcinom, TRO, Ostalo};
 enum ambulante{mokusnice=1,travnicka,crkvice,radakovo,kineski};
 
@@ -173,7 +173,7 @@ struct pacijent{
 		cin.ignore();
         getline(cin, imePrezime);
         cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
-        cout<<setw(25)<<" "<<setw(1)<<"Unesite datum rodjenja (npr. 02.09.2001.): "<<endl;
+        cout<<setw(25)<<" "<<setw(1)<<"Unesite datum rodjenja (npr. 02.09.2001.): \n"<<endl;
         do{
         	cout<<setw(35)<<" ";
             cin >> d;
@@ -192,7 +192,7 @@ struct pacijent{
             getline(cin, brojLicneKarte);
             cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
             validnaLicna++;
-        }while(brojLicneKarte.length()!=9);
+        }while((brojLicneKarte.length()!=9));
         cout<<setw(10)<<" "<<setw(1)<<"Unesite broj telefona: ";
         getline(cin, brojTelefona);
         cout<<endl<<setw(10)<<" "<<setw(1)<<bl2<<endl;
@@ -642,15 +642,19 @@ void kreirajTermine(){
 void generisiPrijave(){ 
     system("cls");
     int n;
-    cout<<"Unesite koliko mock prijava zelite: "<<endl;
+    for (int i=0;i<5;i++) cout << endl;
+    cout<<setw(10)<<" "<<setw(1)<<bl3<<endl;
+    cout<<setw(10)<<" "<<setw(1)<<"Unesite koliko mock prijava zelite: ";
     cin>>n;
+    cout<<endl<<setw(10)<<" "<<setw(1)<<bl3<<endl;
     for(int i=0; i<n; i++){
         pacijent *temp=new pacijent;
         temp->inicijalizacijaRand();
         delete temp;
         temp=NULL;
     }
-    cout<<"Generisanje uspjesno!"<<endl;
+    cout<<setw(10)<<" "<<setw(1)<<"Generisanje uspjesno!"<<endl;
+    cout<<endl<<setw(10)<<" "<<setw(1)<<bl3<<endl;
     system("PAUSE");
 }
 
@@ -659,7 +663,11 @@ void obrisiPrijave(){
     system("cls");
     ofstream brisanje("prijave.txt");
     brisanje.clear();
-    cout<<"Brisanje uspjesno!"<<endl;
+    cout<<setw(10)<<" "<<setw(1)<<bl3;
+    cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
+    cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(23)<<"Brisanje uspjesno!"<<setw(17)<<"|*|"<<endl;
+    cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
+    cout<<setw(10)<<" "<<setw(1)<<bl3<<endl;
     system("PAUSE");
 }
 
@@ -722,13 +730,14 @@ void adminMeni(){
 //Na osnovu broja licne karte/passworda ispisuje datum i vrijeme vakcinacije iz dokumenta termini.txt
 void ispisiTermin(string password){
     system("cls");
+    for (int i=0;i<5;i++) cout<<endl;
     string temp1, temp2, temp3;
     string temp, vrijeme;
     int br=0;
     ifstream termin("termini.txt");
     termin>>temp;
     if(termin.eof()){
-    	 	for (int i=0;i<5;i++) cout<<endl;
+    	 	
         	cout<<setw(10)<<" "<<setw(1)<<bl3;
         	cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(4)<<" "<<setw(1)<<"Termin Vam jos nije dodijeljen!"<<setw(5)<<"|*|"<<endl;
@@ -772,10 +781,15 @@ void ispisiTermin(string password){
                     }
                 }
             }
-            cout<<"Datum vakcinacije: "<<setw(2)<<setfill('0')<<d<<"."<<setw(2)<<m<<"."<<g<<"."<<endl;
-            cout<<"Vrijeme vakcinacije: "<<vrijeme<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<bl3;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(24)<<"Datum vakcinacije: "<<setw(2)<<setfill(' ')<<d<<"."<<setw(2)<<m<<"."<<g<<"."<<setw(5)<<"|*|"<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<bl3;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
+			cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(26)<<"Vrijeme vakcinacije: "<<vrijeme<<setw(10)<<"|*|"<<endl;
+			cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
             termin.close();
-            system("PAUSE");
             return;
         }
     }
@@ -894,13 +908,13 @@ int main(){
         do{
         	cout<<setw(10)<<" "<<setw(1)<<bl3;
         	cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
-            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(6)<<" "<<setw(1)<<"1. Registracija"<<setw(10)<<" "<<setw(9)<<"|*|"<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(6)<<" "<<setw(1)<<"1. Registracija"<<setw(19)<<"|*|"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
-            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(6)<<" "<<setw(1)<<"2. Prijava"<<setw(15)<<" "<<setw(9)<<"|*|"<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(6)<<" "<<setw(1)<<"2. Prijava"<<setw(24)<<"|*|"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
-            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(6)<<" "<<"3. [ADMIN OVERRIDE]"<<setw(6)<<" "<<setw(9)<<"|*|"<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(6)<<" "<<"3. [ADMIN OVERRIDE]"<<setw(15)<<"|*|"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
-            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(6)<<" "<<"4. Kraj programa"<<setw(9)<<" "<<setw(9)<<"|*|"<<endl;
+            cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(6)<<" "<<"4. Kraj programa"<<setw(18)<<"|*|"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<"|*|"<<setw(37)<<" "<<setw(1)<<"|*|"<<endl;
             cout<<setw(10)<<" "<<setw(1)<<bl3<<endl;
             cout<<setw(15)<<" "<<setw(1)<<"Unos: ";
